@@ -1,24 +1,26 @@
-import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
-import { DatabaseModule } from './database/database.module';
-import { AuthModule } from './auth/auth.module';
-import { UserModule } from './user/user.module';
-import { HeroModule } from './hero/hero.module';
-import { AboutModule } from './about/about.module';
-import { TimelineModule } from './timeline/timeline.module';
-import { ProductModule } from './product/product.module';
-import { LeadershipModule } from './leadership/leadership.module';
-import { ContactInfoModule } from './contact-info/contact-info.module';
-import { InquiryModule } from './inquiry/inquiry.module';
-import { SiteContentModule } from './site-content/site-content.module';
-import configuration from './config/configuration';
+import { Module } from "@nestjs/common";
+import { ConfigModule } from "@nestjs/config";
+import { DatabaseModule } from "./database/database.module";
+import { AuthModule } from "./auth/auth.module";
+import { UserModule } from "./user/user.module";
+import { HeroModule } from "./hero/hero.module";
+import { AboutModule } from "./about/about.module";
+import { TimelineModule } from "./timeline/timeline.module";
+import { ProductModule } from "./product/product.module";
+import { LeadershipModule } from "./leadership/leadership.module";
+import { ContactInfoModule } from "./contact-info/contact-info.module";
+import { InquiryModule } from "./inquiry/inquiry.module";
+import { SiteContentModule } from "./site-content/site-content.module";
+import configuration from "./config/configuration";
+import { appController } from "./app.controller";
+import { FileModule } from './file/file.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       load: [configuration],
-      envFilePath: '.env',
+      envFilePath: ".env",
     }),
     DatabaseModule,
     AuthModule,
@@ -31,6 +33,8 @@ import configuration from './config/configuration';
     ContactInfoModule,
     InquiryModule,
     SiteContentModule,
+    FileModule,
   ],
+  controllers: [appController],
 })
 export class AppModule {}
