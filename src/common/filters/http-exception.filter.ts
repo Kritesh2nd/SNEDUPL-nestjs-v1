@@ -5,8 +5,8 @@ import {
   HttpException,
   HttpStatus,
   Logger,
-} from '@nestjs/common';
-import { Request, Response } from 'express';
+} from "@nestjs/common";
+import { Request, Response } from "express";
 
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
@@ -17,15 +17,23 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
 
-    const status =
-      exception instanceof HttpException
-        ? exception.getStatus()
-        : HttpStatus.INTERNAL_SERVER_ERROR;
+    const isHttpException = exception instanceof HttpException;
+
+    const status = isHttpException
+      ? exception.getStatus()
+      : HttpStatus.INTERNAL_SERVER_ERROR;
+
+    const exceptionResponse = isHttpException ? exception.getResponse() : null;
+
+    const normalized =
+      typeof exceptionResponse === "object" && exceptionResponse !== null
+        ? (exceptionResponse as Record<string, any>)
+        : null;
 
     const message =
-      exception instanceof HttpException
-        ? exception.getResponse()
-        : 'Internal server error';
+      normalized?.message || exceptionResponse || "Internal server error";
+
+    const errorCode = normalized?.errorCode || "INTERNAL_SERVER_ERROR";
 
     this.logger.error(
       `${request.method} ${request.url} - ${status}`,
@@ -35,12 +43,15 @@ export class AllExceptionsFilter implements ExceptionFilter {
     response.status(status).json({
       success: false,
       statusCode: status,
+      errorCode,
       timestamp: new Date().toISOString(),
       path: request.url,
       message:
-        typeof message === 'object' && 'message' in (message as object)
-          ? (message as any).message
-          : message,
+        typeof message === "string"
+          ? message
+          : Array.isArray(message)
+            ? message.join(", ")
+            : message,
     });
   }
 }

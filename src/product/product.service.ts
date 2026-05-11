@@ -1,13 +1,9 @@
-import {
-  Injectable,
-  NotFoundException,
-  BadRequestException,
-} from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import * as fs from 'fs';
-import * as path from 'path';
-import { ProductRepository } from './product.repository';
-import { CreateProductDto, UpdateProductDto } from './dto/product.dto';
+import { Injectable, NotFoundException } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import * as fs from "fs";
+import * as path from "path";
+import { ProductRepository } from "./product.repository";
+import { CreateProductDto, UpdateProductDto } from "./dto/product.dto";
 
 @Injectable()
 export class ProductService {
@@ -27,7 +23,7 @@ export class ProductService {
   }
 
   async create(dto: CreateProductDto, file?: Express.Multer.File) {
-    const imageUrl = file ? this.buildImageUrl(file.filename) : '';
+    const imageUrl = file ? this.buildImageUrl(file.filename) : "";
     return this.productRepository.create({ ...dto, image: imageUrl });
   }
 
@@ -44,20 +40,21 @@ export class ProductService {
   async remove(id: string) {
     const existing = await this.findById(id);
     this.deleteOldImage(existing.image);
+
     await this.productRepository.remove(id);
-    return { message: 'Product deleted' };
+    return { message: "Product deleted" };
   }
 
   private buildImageUrl(filename: string): string {
-    const base = this.configService.get<string>('appBaseUrl');
-    return `${base}/uploads/${filename}`;
+    return "/file/" + filename;
   }
 
   private deleteOldImage(imageUrl: string): void {
+    console.log("imageUrl", imageUrl);
     if (!imageUrl) return;
     try {
       const filename = path.basename(imageUrl);
-      const filePath = path.join(process.cwd(), 'uploads', filename);
+      const filePath = path.join(process.cwd(), "uploads", filename);
       if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
     } catch (_) {}
   }

@@ -13,31 +13,32 @@ import {
   HttpCode,
   HttpStatus,
   BadRequestException,
-} from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import { extname } from 'path';
-import { ProductService } from './product.service';
-import { CreateProductDto, UpdateProductDto } from './dto/product.dto';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+} from "@nestjs/common";
+import { FileInterceptor } from "@nestjs/platform-express";
+import { diskStorage } from "multer";
+import { extname } from "path";
+import { ProductService } from "./product.service";
+import { CreateProductDto, UpdateProductDto } from "./dto/product.dto";
+import { JwtAuthGuard } from "../auth/jwt-auth.guard";
+import { plainToInstance } from "class-transformer";
 
 const imageStorage = diskStorage({
-  destination: './uploads',
+  destination: "./uploads",
   filename: (_req, file, cb) => {
-    const unique = Date.now() + '-' + Math.round(Math.random() * 1e9);
+    const unique = Date.now() + "-" + Math.round(Math.random() * 1e9);
     cb(null, `product-${unique}${extname(file.originalname)}`);
   },
 });
 
 const imageFilter = (_req: any, file: any, cb: any) => {
   if (!file.mimetype.match(/\/(jpg|jpeg|png|gif|webp)$/)) {
-    cb(new BadRequestException('Only image files are allowed'), false);
+    cb(new BadRequestException("Only image files are allowed"), false);
   } else {
     cb(null, true);
   }
 };
 
-@Controller('products')
+@Controller("products")
 export class ProductController {
   constructor(private readonly productService: ProductService) {}
 
@@ -46,33 +47,52 @@ export class ProductController {
     return this.productService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id', ParseUUIDPipe) id: string) {
+  @Get(":id")
+  findOne(@Param("id", ParseUUIDPipe) id: string) {
     return this.productService.findById(id);
   }
 
   @Post()
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(FileInterceptor('image', { storage: imageStorage, fileFilter: imageFilter, limits: { fileSize: 5 * 1024 * 1024 } }))
-  create(@Body() dto: CreateProductDto, @UploadedFile() file?: Express.Multer.File) {
+  @UseInterceptors(
+    FileInterceptor("image", {
+      storage: imageStorage,
+      fileFilter: imageFilter,
+      limits: { fileSize: 5 * 1024 * 1024 },
+    }),
+  )
+  create(
+    @Body("product") product: string,
+    @UploadedFile() file?: Express.Multer.File,
+  ) {
+    const parsedProduct = JSON.parse(product);
+    const dto = plainToInstance(CreateProductDto, parsedProduct);
     return this.productService.create(dto, file);
   }
 
-  @Patch(':id')
+  @Patch(":id")
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(FileInterceptor('image', { storage: imageStorage, fileFilter: imageFilter, limits: { fileSize: 5 * 1024 * 1024 } }))
+  @UseInterceptors(
+    FileInterceptor("image", {
+      storage: imageStorage,
+      fileFilter: imageFilter,
+      limits: { fileSize: 5 * 1024 * 1024 },
+    }),
+  )
   update(
-    @Param('id', ParseUUIDPipe) id: string,
-    @Body() dto: UpdateProductDto,
+    @Param("id", ParseUUIDPipe) id: string,
+    @Body("product") product: string,
     @UploadedFile() file?: Express.Multer.File,
   ) {
+    const parsedProduct = JSON.parse(product);
+    const dto = plainToInstance(CreateProductDto, parsedProduct);
     return this.productService.update(id, dto, file);
   }
 
-  @Delete(':id')
+  @Delete(":id")
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
-  remove(@Param('id', ParseUUIDPipe) id: string) {
+  remove(@Param("id", ParseUUIDPipe) id: string) {
     return this.productService.remove(id);
   }
 }
