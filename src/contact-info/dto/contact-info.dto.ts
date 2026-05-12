@@ -6,9 +6,9 @@ import {
   IsUrl,
   ValidateNested,
   IsObject,
-} from 'class-validator';
-import { Type } from 'class-transformer';
-import { PartialType } from '@nestjs/mapped-types';
+} from "class-validator";
+import { Type } from "class-transformer";
+import { PartialType } from "@nestjs/mapped-types";
 
 export class SocialLinksDto {
   @IsOptional()
@@ -31,7 +31,11 @@ export class SocialLinksDto {
 export class CreateContactInfoDto {
   @IsString()
   @IsNotEmpty()
-  address: string;
+  factoryAddress: string;
+
+  @IsString()
+  @IsNotEmpty()
+  officeAddress: string;
 
   @IsString()
   @IsNotEmpty()
@@ -39,10 +43,6 @@ export class CreateContactInfoDto {
 
   @IsEmail()
   email: string;
-
-  @IsString()
-  @IsNotEmpty()
-  mapEmbedUrl: string;
 
   @IsOptional()
   @IsObject()

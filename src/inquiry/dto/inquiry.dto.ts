@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsEmail, IsOptional } from 'class-validator';
+import { IsString, IsNotEmpty, IsEmail, IsOptional } from "class-validator";
 
 export class CreateInquiryDto {
   @IsString()
@@ -19,4 +19,10 @@ export class CreateInquiryDto {
   @IsString()
   @IsNotEmpty()
   message: string;
+}
+
+export interface GetInquiriesParams {
+  page: number;
+  limit: number;
+  search: string;
 }

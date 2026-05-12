@@ -4,15 +4,18 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
-} from 'typeorm';
+} from "typeorm";
 
-@Entity('contact_info')
+@Entity("contact_info")
 export class ContactInfoEntity {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryGeneratedColumn("uuid")
   id: string;
 
-  @Column({ type: 'text' })
-  address: string;
+  @Column({ type: "text" })
+  factoryAddress: string;
+
+  @Column({ type: "text" })
+  officeAddress: string;
 
   @Column()
   phone: string;
@@ -20,10 +23,10 @@ export class ContactInfoEntity {
   @Column()
   email: string;
 
-  @Column({ type: 'text' })
+  @Column({ type: "text", nullable: true, default: null })
   mapEmbedUrl: string;
 
-  @Column({ type: 'jsonb', default: '{}' })
+  @Column({ type: "jsonb", default: "{}" })
   socialLinks: {
     facebook?: string;
     instagram?: string;

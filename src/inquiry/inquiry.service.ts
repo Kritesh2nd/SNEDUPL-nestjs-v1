@@ -1,6 +1,7 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { InquiryRepository } from './inquiry.repository';
-import { CreateInquiryDto } from './dto/inquiry.dto';
+import { Injectable, NotFoundException } from "@nestjs/common";
+import { InquiryRepository } from "./inquiry.repository";
+import { CreateInquiryDto, GetInquiriesParams } from "./dto/inquiry.dto";
+import { ILike } from "typeorm";
 
 @Injectable()
 export class InquiryService {
@@ -16,6 +17,11 @@ export class InquiryService {
     return inquiry;
   }
 
+  async getInquiries(params: GetInquiriesParams) {
+    const data = await this.inquiryRepository.findBySearchPagination(params);
+    return data;
+  }
+
   create(dto: CreateInquiryDto) {
     return this.inquiryRepository.create(dto);
   }
@@ -28,6 +34,6 @@ export class InquiryService {
   async remove(id: string) {
     await this.findById(id);
     await this.inquiryRepository.remove(id);
-    return { message: 'Inquiry deleted' };
+    return { message: "Inquiry deleted" };
   }
 }

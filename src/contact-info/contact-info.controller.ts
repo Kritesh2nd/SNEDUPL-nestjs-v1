@@ -8,12 +8,15 @@ import {
   UseGuards,
   HttpCode,
   HttpStatus,
-} from '@nestjs/common';
-import { ContactInfoService } from './contact-info.service';
-import { CreateContactInfoDto, UpdateContactInfoDto } from './dto/contact-info.dto';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+} from "@nestjs/common";
+import { ContactInfoService } from "./contact-info.service";
+import {
+  CreateContactInfoDto,
+  UpdateContactInfoDto,
+} from "./dto/contact-info.dto";
+import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 
-@Controller('contact-info')
+@Controller("contact-info")
 export class ContactInfoController {
   constructor(private readonly contactInfoService: ContactInfoService) {}
 

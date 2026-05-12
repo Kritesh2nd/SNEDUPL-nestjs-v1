@@ -10,12 +10,13 @@ import {
   ParseUUIDPipe,
   HttpCode,
   HttpStatus,
-} from '@nestjs/common';
-import { InquiryService } from './inquiry.service';
-import { CreateInquiryDto } from './dto/inquiry.dto';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+  Query,
+} from "@nestjs/common";
+import { InquiryService } from "./inquiry.service";
+import { CreateInquiryDto } from "./dto/inquiry.dto";
+import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 
-@Controller('inquiries')
+@Controller("inquiries")
 export class InquiryController {
   constructor(private readonly inquiryService: InquiryService) {}
 
@@ -26,28 +27,43 @@ export class InquiryController {
   }
 
   // Protected — admin only
+  // @Get()
+  // @UseGuards(JwtAuthGuard)
+  // findAll() {
+  //   return this.inquiryService.findAll();
+  // }
+
+  // Protected — admin only
   @Get()
   @UseGuards(JwtAuthGuard)
-  findAll() {
-    return this.inquiryService.findAll();
+  async getInquiries(
+    @Query("page") page?: string,
+    @Query("limit") limit?: string,
+    @Query("search") search?: string,
+  ) {
+    return this.inquiryService.getInquiries({
+      page: Number(page) || 1,
+      limit: Number(limit) || 20,
+      search: search || "",
+    });
   }
 
-  @Get(':id')
+  @Get(":id")
   @UseGuards(JwtAuthGuard)
-  findOne(@Param('id', ParseUUIDPipe) id: string) {
+  findOne(@Param("id", ParseUUIDPipe) id: string) {
     return this.inquiryService.findById(id);
   }
 
-  @Patch(':id/read')
+  @Patch(":id/read")
   @UseGuards(JwtAuthGuard)
-  markRead(@Param('id', ParseUUIDPipe) id: string) {
+  markRead(@Param("id", ParseUUIDPipe) id: string) {
     return this.inquiryService.markRead(id);
   }
 
-  @Delete(':id')
+  @Delete(":id")
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
-  remove(@Param('id', ParseUUIDPipe) id: string) {
+  remove(@Param("id", ParseUUIDPipe) id: string) {
     return this.inquiryService.remove(id);
   }
 }
