@@ -33,6 +33,8 @@ export interface MetaDataResponse {
   totalItems: number;
 
   totalPages: number;
+
+  unread?: number;
 }
 
 export interface ResponseDto<T> {

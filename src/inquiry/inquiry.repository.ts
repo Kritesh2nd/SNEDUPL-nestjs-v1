@@ -46,6 +46,10 @@ export class InquiryRepository {
 
     const totalPages = await this.repo.count();
 
+    const totalUnread = await this.repo.count({
+      where: { read: false },
+    });
+
     return {
       data,
       metadata: {
@@ -53,6 +57,7 @@ export class InquiryRepository {
         limit,
         totalItems,
         totalPages,
+        unread: totalUnread,
       },
     };
   }
