@@ -12,6 +12,7 @@ import * as fs from "fs";
 @Injectable()
 export class FileService {
   getFileStream(fileName: string) {
+    console.log("fileName", fileName);
     const filePath = join(process.cwd(), "uploads", fileName);
 
     if (!existsSync(filePath)) {

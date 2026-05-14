@@ -8,6 +8,7 @@ export class FileController {
 
   @Get(":fileName")
   async getFile(@Param("fileName") fileName: string, @Res() res: Response) {
+    console.log("fileName ctrl", fileName);
     const file = this.fileService.getFileStream(fileName);
 
     res.setHeader("Content-Type", file.contentType);
