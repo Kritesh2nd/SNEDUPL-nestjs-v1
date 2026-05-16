@@ -6,7 +6,7 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "build": "npx nest build",
+    "build": "nest build",
     "start": "node dist/main",
     "start:dev": "npx nest start --watch",
     "start:prod": "node dist/main"
