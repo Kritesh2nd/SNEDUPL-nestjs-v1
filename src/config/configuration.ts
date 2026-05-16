@@ -1,5 +1,6 @@
 export default () => ({
   nodeEnv: process.env.NODE_ENV || "development",
+  dbEnv: process.env.DB_ENV || "local",
   port: parseInt(process.env.PORT, 10) || 3000,
   frontendUrl: process.env.FRONTEND_URL || "http://localhost:5173",
   appBaseUrl: process.env.APP_BASE_URL || "http://localhost:8000",
@@ -9,6 +10,7 @@ export default () => ({
     username: process.env.DB_USERNAME || "postgres",
     password: process.env.DB_PASSWORD || "postgres",
     name: process.env.DB_NAME || "distillery_db",
+    url: process.env.DATABASE_URL || "",
   },
   jwt: {
     secret: process.env.JWT_SECRET || "fallback_secret",
