@@ -38,9 +38,13 @@ import { ConfigModule, ConfigService } from "@nestjs/config";
         return {
           ...baseConfig,
           url: configService.get<string>("database.url"),
-          ssl: {
-            rejectUnauthorized: true,
-          },
+          // ssl: {
+          //   rejectUnauthorized: true,
+          // },
+          ssl:
+            process.env.NODE_ENV === "production"
+              ? { rejectUnauthorized: false }
+              : false,
         };
       },
       inject: [ConfigService],
