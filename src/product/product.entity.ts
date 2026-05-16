@@ -4,37 +4,40 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
-} from 'typeorm';
-import { ProductCategory } from '../common/types';
+} from "typeorm";
+import { ProductCategory } from "../common/types";
 
-@Entity('products')
+@Entity("products")
 export class ProductEntity {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryGeneratedColumn("uuid")
   id: string;
 
   @Column()
   name: string;
 
-  @Column({ type: 'varchar' })
+  @Column({ type: "varchar" })
   category: ProductCategory;
 
   @Column()
   tagline: string;
 
-  @Column({ type: 'text' })
+  @Column({ type: "text" })
   description: string;
 
-  @Column({ type: 'float', nullable: true })
+  @Column({ type: "float", nullable: true })
   alcoholPercent: number | null;
 
   @Column()
   origin: string;
 
-  @Column({ type: 'jsonb', default: '[]' })
+  @Column({ type: "jsonb", default: "[]" })
   tasteNotes: { label: string }[];
 
-  @Column({ default: '' })
+  @Column({ default: "" })
   image: string;
+
+  @Column({ default: "" })
+  publicImageUrl: string;
 
   @Column({ default: false })
   featured: boolean;
@@ -42,7 +45,7 @@ export class ProductEntity {
   @Column({ default: false })
   isUpcoming: boolean;
 
-  @Column({ type: 'text', array: true, default: '{}' })
+  @Column({ type: "text", array: true, default: "{}" })
   variants: string[];
 
   @CreateDateColumn()

@@ -27,31 +27,6 @@ export class FileService {
     };
   }
 
-  // deleteFileByUrl(fileUrl: string): void {
-  //   // const filePath = join(process.cwd(), "uploads", fileUrl);
-  //   try {
-  //     if (!fileUrl) return;
-
-  //     // 1. Extract filename from URL
-  //     const fileName = fileUrl.split("/").pop();
-
-  //     if (!fileName) {
-  //       throw new Error("Invalid file URL");
-  //     }
-
-  //     // 2. Build absolute file path
-  //     // const filePath = path.join(this.uploadDir, fileName);
-  //     const filePath = join(process.cwd(), "uploads", fileUrl);
-
-  //     // 3. Check if file exists
-  //     if (fs.existsSync(filePath)) {
-  //       fs.unlinkSync(filePath);
-  //     }
-  //   } catch (err) {
-  //     throw new InternalServerErrorException("Failed to delete file");
-  //   }
-  // }
-
   private getMimeType(fileName: string): string {
     const ext = fileName.split(".").pop();
 

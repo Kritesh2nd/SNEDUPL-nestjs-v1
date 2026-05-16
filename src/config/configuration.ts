@@ -21,4 +21,9 @@ export default () => ({
     email: process.env.ADMIN_EMAIL || "admin@distillery.com",
     avatarUrl: process.env.ADMIN_AVATAR_URL || "",
   },
+  cloudinary: {
+    name: process.env.CLOUDINARY_CLOUD_NAME || "",
+    key: process.env.CLOUDINARY_API_KEY || "",
+    secret: process.env.CLOUDINARY_API_SECRET || "",
+  },
 });

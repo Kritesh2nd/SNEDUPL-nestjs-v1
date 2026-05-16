@@ -11,7 +11,7 @@ async function bootstrap() {
   const logger = new Logger("Bootstrap");
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-  // Ensure uploads dir exists
+  // Ensure uploads dir exists`
   const uploadsDir = join(process.cwd(), "uploads");
   if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
 

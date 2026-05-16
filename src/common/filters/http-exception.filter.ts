@@ -35,11 +35,16 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
     const errorCode = normalized?.errorCode || "INTERNAL_SERVER_ERROR";
 
+    // this.logger.error(
+    //   `${request.method} ${request.url} - ${status}`,
+    //   exception instanceof Error ? exception.stack : String(exception),
+    // );
     this.logger.error(
       `${request.method} ${request.url} - ${status}`,
-      exception instanceof Error ? exception.stack : String(exception),
+      exception instanceof Error
+        ? exception.stack
+        : JSON.stringify(exception, null, 2),
     );
-
     response.status(status).json({
       success: false,
       statusCode: status,

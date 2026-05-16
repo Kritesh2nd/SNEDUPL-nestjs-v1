@@ -4,12 +4,13 @@ import * as fs from "fs";
 import * as path from "path";
 import { LeadershipRepository } from "./leadership.repository";
 import { CreateLeadershipDto, UpdateLeadershipDto } from "./dto/leadership.dto";
+import { CloudinaryService } from "@/file/cloudinary.service";
 
 @Injectable()
 export class LeadershipService {
   constructor(
     private readonly leadershipRepository: LeadershipRepository,
-    private readonly configService: ConfigService,
+    private cloudinary: CloudinaryService,
   ) {}
 
   findAll() {
@@ -24,8 +25,15 @@ export class LeadershipService {
   }
 
   async create(dto: CreateLeadershipDto, file?: Express.Multer.File) {
-    const imageUrl = file ? this.buildImageUrl(file.filename) : "";
-    return this.leadershipRepository.create({ ...dto, image: imageUrl });
+    // const imageUrl = file ? this.buildImageUrl(file.filename) : "";
+    const { imageUrl, imagePublicId } =
+      await this.uploadImageInCloudinary(file);
+
+    return this.leadershipRepository.create({
+      ...dto,
+      image: imageUrl,
+      publicImageUrl: imagePublicId,
+    });
   }
 
   async update(
@@ -34,31 +42,77 @@ export class LeadershipService {
     file?: Express.Multer.File,
   ) {
     const existing = await this.findById(id);
+    await this.deleteImageInCloudinary(existing.publicImageUrl);
+
     const updateData: any = { ...dto };
-    if (file) {
-      this.deleteOldImage(existing.image);
-      updateData.image = this.buildImageUrl(file.filename);
-    }
-    return this.leadershipRepository.update(id, updateData);
+    const { imageUrl, imagePublicId } =
+      await this.uploadImageInCloudinary(file);
+
+    console.log("imageUrl", imageUrl, "imagePublicId", imagePublicId);
+
+    return this.leadershipRepository.update(id, {
+      ...updateData,
+      image: imageUrl,
+      publicImageUrl: imagePublicId,
+    });
   }
 
   async remove(id: string) {
     const existing = await this.findById(id);
-    this.deleteOldImage(existing.image);
+
+    // this.deleteOldImage(existing.image);
+    await this.deleteImageInCloudinary(existing.publicImageUrl);
+
     await this.leadershipRepository.remove(id);
     return { message: "Leadership profile deleted" };
   }
 
-  private buildImageUrl(filename: string): string {
-    return "/file/" + filename;
+  // private buildImageUrl(filename: string): string {
+  //   return "/file/" + filename;
+  // }
+
+  // private deleteOldImage(imageUrl: string): void {
+  //   if (!imageUrl) return;
+  //   try {
+  //     const filename = path.basename(imageUrl);
+  //     const filePath = path.join(process.cwd(), "uploads", filename);
+  //     if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+  //   } catch (_) {}
+  // }
+
+  private async uploadImageInCloudinary(file?: Express.Multer.File) {
+    try {
+      let imageUrl = "";
+      let imagePublicId = "";
+      if (file) {
+        const uploaded = await this.cloudinary.uploadImage(
+          "leadership",
+          file.path,
+        );
+        imageUrl = uploaded.secure_url;
+        imagePublicId = uploaded.public_id;
+
+        console.log(
+          "uploaded.secure_url",
+          uploaded.secure_url,
+          "uploaded.public_id",
+          uploaded.public_id,
+        );
+      }
+
+      return { imageUrl, imagePublicId };
+    } catch (err) {
+      console.log("Error In Image upload: ", err);
+    } finally {
+      console.log("file data, name:", file.originalname, ", size:", file.size);
+    }
   }
 
-  private deleteOldImage(imageUrl: string): void {
-    if (!imageUrl) return;
+  private async deleteImageInCloudinary(publicImageUrl: string) {
     try {
-      const filename = path.basename(imageUrl);
-      const filePath = path.join(process.cwd(), "uploads", filename);
-      if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
-    } catch (_) {}
+      await this.cloudinary.deleteImage(publicImageUrl);
+    } catch (err) {
+      console.log("Invalid Public Image ID, Failed to Delete: ", err);
+    }
   }
 }

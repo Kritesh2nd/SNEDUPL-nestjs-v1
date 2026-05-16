@@ -15,28 +15,25 @@ import {
   BadRequestException,
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
-import { diskStorage } from "multer";
-import { extname } from "path";
+import { memoryStorage } from "multer";
 import { LeadershipService } from "./leadership.service";
-import { CreateLeadershipDto, UpdateLeadershipDto } from "./dto/leadership.dto";
+import { CreateLeadershipDto } from "./dto/leadership.dto";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 import { plainToInstance } from "class-transformer";
 
-const imageStorage = diskStorage({
-  destination: "./uploads",
-  filename: (_req, file, cb) => {
-    const unique = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, `leader-${unique}${extname(file.originalname)}`);
-  },
-});
-
-const imageFilter = (_req: any, file: any, cb: any) => {
-  if (!file.mimetype.match(/\/(jpg|jpeg|png|gif|webp)$/)) {
+const imageFilter = (_req: any, image: any, cb: any) => {
+  if (!image.mimetype.match(/\/(jpg|jpeg|png|gif|webp)$/)) {
     cb(new BadRequestException("Only image files are allowed"), false);
   } else {
     cb(null, true);
   }
 };
+
+const uploadInterceptor = FileInterceptor("image", {
+  storage: memoryStorage(),
+  fileFilter: imageFilter,
+  limits: { fileSize: 5 * 1024 * 1024 },
+});
 
 @Controller("leadership")
 export class LeadershipController {
@@ -54,39 +51,28 @@ export class LeadershipController {
 
   @Post()
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(
-    FileInterceptor("image", {
-      storage: imageStorage,
-      fileFilter: imageFilter,
-      limits: { fileSize: 5 * 1024 * 1024 },
-    }),
-  )
+  @UseInterceptors(uploadInterceptor)
   create(
     @Body("data") data: string,
-    @UploadedFile() file?: Express.Multer.File,
+    @UploadedFile() image?: Express.Multer.File,
   ) {
     const parsedData = JSON.parse(data);
     const dto = plainToInstance(CreateLeadershipDto, parsedData);
-    return this.leadershipService.create(dto, file);
+    return this.leadershipService.create(dto, image);
   }
 
   @Patch(":id")
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(
-    FileInterceptor("image", {
-      storage: imageStorage,
-      fileFilter: imageFilter,
-      limits: { fileSize: 5 * 1024 * 1024 },
-    }),
-  )
+  @UseInterceptors(uploadInterceptor)
   update(
     @Param("id", ParseUUIDPipe) id: string,
     @Body("data") data: string,
-    @UploadedFile() file?: Express.Multer.File,
+    @UploadedFile() image?: Express.Multer.File,
   ) {
+    console.log("image", image.originalname ?? "no image");
     const parsedData = JSON.parse(data);
     const dto = plainToInstance(CreateLeadershipDto, parsedData);
-    return this.leadershipService.update(id, dto, file);
+    return this.leadershipService.update(id, dto, image);
   }
 
   @Delete(":id")

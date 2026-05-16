@@ -4,11 +4,11 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
-} from 'typeorm';
+} from "typeorm";
 
-@Entity('leadership_profiles')
+@Entity("leadership_profiles")
 export class LeadershipEntity {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryGeneratedColumn("uuid")
   id: string;
 
   @Column()
@@ -17,16 +17,19 @@ export class LeadershipEntity {
   @Column()
   position: string;
 
-  @Column({ type: 'text' })
+  @Column({ type: "text" })
   bio: string;
 
-  @Column({ default: '' })
+  @Column({ default: "" })
   image: string;
 
-  @Column({ type: 'varchar' })
-  boardType: 'Board of Directors' | 'Management';
+  @Column({ default: "" })
+  publicImageUrl: string;
 
-  @Column({ type: 'int', default: 0 })
+  @Column({ type: "varchar" })
+  boardType: "Board of Directors" | "Management";
+
+  @Column({ type: "int", default: 0 })
   displayOrder: number;
 
   @Column({ default: true })

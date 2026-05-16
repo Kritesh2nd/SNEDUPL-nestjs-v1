@@ -4,12 +4,13 @@ import * as fs from "fs";
 import * as path from "path";
 import { ProductRepository } from "./product.repository";
 import { CreateProductDto, UpdateProductDto } from "./dto/product.dto";
+import { CloudinaryService } from "@/file/cloudinary.service";
 
 @Injectable()
 export class ProductService {
   constructor(
     private readonly productRepository: ProductRepository,
-    private readonly configService: ConfigService,
+    private cloudinary: CloudinaryService,
   ) {}
 
   findAll() {
@@ -23,39 +24,69 @@ export class ProductService {
   }
 
   async create(dto: CreateProductDto, file?: Express.Multer.File) {
-    const imageUrl = file ? this.buildImageUrl(file.filename) : "";
-    return this.productRepository.create({ ...dto, image: imageUrl });
+    // const imageUrl = file ? this.buildImageUrl(file.filename) : "";
+    const { imageUrl, imagePublicId } =
+      await this.uploadImageInCloudinary(file);
+    return this.productRepository.create({
+      ...dto,
+      image: imageUrl,
+      publicImageUrl: imagePublicId,
+    });
   }
 
   async update(id: string, dto: UpdateProductDto, file?: Express.Multer.File) {
     const existing = await this.findById(id);
     const updateData: any = { ...dto };
     if (file) {
-      this.deleteOldImage(existing.image);
-      updateData.image = this.buildImageUrl(file.filename);
+      // this.deleteOldImage(existing.image);
+      await this.deleteImageInCloudinary(existing.publicImageUrl);
+      // updateData.image = this.buildImageUrl(file.filename);
+      const { imageUrl, imagePublicId } =
+        await this.uploadImageInCloudinary(file);
     }
     return this.productRepository.update(id, updateData);
   }
 
   async remove(id: string) {
     const existing = await this.findById(id);
-    this.deleteOldImage(existing.image);
+    // this.deleteOldImage(existing.image);
+    await this.deleteImageInCloudinary(existing.publicImageUrl);
 
     await this.productRepository.remove(id);
     return { message: "Product deleted" };
   }
 
-  private buildImageUrl(filename: string): string {
-    return "/file/" + filename;
+  // private buildImageUrl(filename: string): string {
+  //   return "/file/" + filename;
+  // }
+
+  // private deleteOldImage(imageUrl: string): void {
+  //   console.log("imageUrl", imageUrl);
+  //   if (!imageUrl) return;
+  //   try {
+  //     const filename = path.basename(imageUrl);
+  //     const filePath = path.join(process.cwd(), "uploads", filename);
+  //     if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+  //   } catch (_) {}
+  // }
+
+  private async uploadImageInCloudinary(file?: Express.Multer.File) {
+    let imageUrl = "";
+    let imagePublicId = "";
+    if (file) {
+      const uploaded = await this.cloudinary.uploadImage("products", file.path);
+      imageUrl = uploaded.secure_url;
+      imagePublicId = uploaded.public_id;
+    }
+
+    return { imageUrl, imagePublicId };
   }
 
-  private deleteOldImage(imageUrl: string): void {
-    console.log("imageUrl", imageUrl);
-    if (!imageUrl) return;
+  private async deleteImageInCloudinary(publicImageUrl: string) {
     try {
-      const filename = path.basename(imageUrl);
-      const filePath = path.join(process.cwd(), "uploads", filename);
-      if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
-    } catch (_) {}
+      await this.cloudinary.deleteImage(publicImageUrl);
+    } catch (err) {
+      console.log("Invalid Public Image ID, Failed to Delete");
+    }
   }
 }
