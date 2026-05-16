@@ -60,3 +60,4 @@ _keys
 uploads/*
 
 .env
+.env.production

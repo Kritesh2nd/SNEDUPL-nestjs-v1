@@ -20,6 +20,8 @@ import { ConfigModule, ConfigService } from "@nestjs/config";
           retryDelay: 3000,
         };
 
+        console.log("dbEnv: ", dbEnv);
+
         if (isLocal) {
           // Local DB config
           return {
@@ -37,7 +39,7 @@ import { ConfigModule, ConfigService } from "@nestjs/config";
           ...baseConfig,
           url: configService.get<string>("database.url"),
           ssl: {
-            rejectUnauthorized: false,
+            rejectUnauthorized: true,
           },
         };
       },
