@@ -48,8 +48,6 @@ export class LeadershipService {
     const { imageUrl, imagePublicId } =
       await this.uploadImageInCloudinary(file);
 
-    console.log("imageUrl", imageUrl, "imagePublicId", imagePublicId);
-
     return this.leadershipRepository.update(id, {
       ...updateData,
       image: imageUrl,
@@ -71,14 +69,14 @@ export class LeadershipService {
   //   return "/file/" + filename;
   // }
 
-  // private deleteOldImage(imageUrl: string): void {
-  //   if (!imageUrl) return;
-  //   try {
-  //     const filename = path.basename(imageUrl);
-  //     const filePath = path.join(process.cwd(), "uploads", filename);
-  //     if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
-  //   } catch (_) {}
-  // }
+  private deleteOldImage(imageUrl: string): void {
+    if (!imageUrl) return;
+    try {
+      const filename = path.basename(imageUrl);
+      const filePath = path.join(process.cwd(), "uploads", filename);
+      if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+    } catch (_) {}
+  }
 
   private async uploadImageInCloudinary(file?: Express.Multer.File) {
     try {
@@ -92,14 +90,8 @@ export class LeadershipService {
         imageUrl = uploaded.secure_url;
         imagePublicId = uploaded.public_id;
 
-        console.log(
-          "uploaded.secure_url",
-          uploaded.secure_url,
-          "uploaded.public_id",
-          uploaded.public_id,
-        );
+        this.deleteOldImage(file.filename);
       }
-
       return { imageUrl, imagePublicId };
     } catch (err) {
       console.log("Error In Image upload: ", err);

@@ -60,15 +60,14 @@ export class ProductService {
   //   return "/file/" + filename;
   // }
 
-  // private deleteOldImage(imageUrl: string): void {
-  //   console.log("imageUrl", imageUrl);
-  //   if (!imageUrl) return;
-  //   try {
-  //     const filename = path.basename(imageUrl);
-  //     const filePath = path.join(process.cwd(), "uploads", filename);
-  //     if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
-  //   } catch (_) {}
-  // }
+  private deleteOldImage(imageUrl: string): void {
+    if (!imageUrl) return;
+    try {
+      const filename = path.basename(imageUrl);
+      const filePath = path.join(process.cwd(), "uploads", filename);
+      if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+    } catch (_) {}
+  }
 
   private async uploadImageInCloudinary(file?: Express.Multer.File) {
     let imageUrl = "";
@@ -77,6 +76,7 @@ export class ProductService {
       const uploaded = await this.cloudinary.uploadImage("products", file.path);
       imageUrl = uploaded.secure_url;
       imagePublicId = uploaded.public_id;
+      this.deleteOldImage(file.filename);
     }
 
     return { imageUrl, imagePublicId };

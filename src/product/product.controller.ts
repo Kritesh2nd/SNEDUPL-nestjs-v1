@@ -15,11 +15,20 @@ import {
   BadRequestException,
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
-import { memoryStorage } from "multer";
+import { diskStorage } from "multer";
+import { extname } from "path";
 import { ProductService } from "./product.service";
-import { CreateProductDto } from "./dto/product.dto";
+import { CreateProductDto, UpdateProductDto } from "./dto/product.dto";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 import { plainToInstance } from "class-transformer";
+
+const imageStorage = diskStorage({
+  destination: "./uploads",
+  filename: (_req, file, cb) => {
+    const unique = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(null, `product-${unique}${extname(file.originalname)}`);
+  },
+});
 
 const imageFilter = (_req: any, file: any, cb: any) => {
   if (!file.mimetype.match(/\/(jpg|jpeg|png|gif|webp)$/)) {
@@ -28,12 +37,6 @@ const imageFilter = (_req: any, file: any, cb: any) => {
     cb(null, true);
   }
 };
-
-const uploadInterceptor = FileInterceptor("image", {
-  storage: memoryStorage(),
-  fileFilter: imageFilter,
-  limits: { fileSize: 5 * 1024 * 1024 },
-});
 
 @Controller("products")
 export class ProductController {
@@ -51,7 +54,13 @@ export class ProductController {
 
   @Post()
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(uploadInterceptor)
+  @UseInterceptors(
+    FileInterceptor("image", {
+      storage: imageStorage,
+      fileFilter: imageFilter,
+      limits: { fileSize: 5 * 1024 * 1024 },
+    }),
+  )
   create(
     @Body("product") product: string,
     @UploadedFile() file?: Express.Multer.File,
@@ -63,7 +72,13 @@ export class ProductController {
 
   @Patch(":id")
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(uploadInterceptor)
+  @UseInterceptors(
+    FileInterceptor("image", {
+      storage: imageStorage,
+      fileFilter: imageFilter,
+      limits: { fileSize: 5 * 1024 * 1024 },
+    }),
+  )
   update(
     @Param("id", ParseUUIDPipe) id: string,
     @Body("product") product: string,
